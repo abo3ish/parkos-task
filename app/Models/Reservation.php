@@ -25,4 +25,14 @@ class Reservation extends Model
         'arrival_date',
         'departure_date',
     ];
+
+    public static function getLatestUUID()
+    {
+        return self::orderBy('id', 'desc')->first()->uuid ?? 1000;
+    }
+
+    public static function getNextUUID()
+    {
+        return self::getLatestUUID() + 1;
+    }
 }

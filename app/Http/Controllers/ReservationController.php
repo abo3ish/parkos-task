@@ -2,8 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
+use App\Models\User;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Http\Requests\StoreReservation;
+use App\Http\Resources\ReservationResource;
 
 class ReservationController extends Controller
 {
@@ -14,17 +19,11 @@ class ReservationController extends Controller
      */
     public function index()
     {
-        //
-    }
+        $reservations = Reservation::all();
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        return response()->json([
+            'reservations' => ReservationResource::collection($reservations),
+        ]);
     }
 
     /**
@@ -33,9 +32,36 @@ class ReservationController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreReservation $request)
     {
-        //
+        // dd(Reservation::getNextUUID());
+        try {
+            DB::beginTransaction();
+
+            $reservation = Reservation::create([
+                'user_id' => auth()->id(),
+                'parking_id' => $request->parking_id,
+                'arrival_date' => $request->arrival_date,
+                'departure_date' => $request->arrival_date,
+                'status' => Reservation::STATUS_PENDING,
+                'uuid' => Reservation::getNextUUID()
+            ]);
+
+            $reservationResource = new ReservationResource($reservation);
+
+            DB::commit();
+
+            return response()->json([
+                'reservation' => $reservationResource,
+            ]);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 500);
+
+            DB::rollBack();
+        }
     }
 
     /**
@@ -46,18 +72,14 @@ class ReservationController extends Controller
      */
     public function show(Reservation $reservation)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Reservation  $reservation
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Reservation $reservation)
-    {
-        //
+        if (auth()->id() != $reservation->user_id) {
+            return response()->json([
+                'error' => 'You are not authorized to view this reservation'
+            ], 403);
+        }
+        return response()->json([
+            'reservation' => new ReservationResource($reservation)
+        ]);
     }
 
     /**
@@ -69,7 +91,17 @@ class ReservationController extends Controller
      */
     public function update(Request $request, Reservation $reservation)
     {
-        //
+        if (auth()->id() != $reservation->user_id) {
+            return response()->json([
+                'error' => 'You are not authorized to update this reservation'
+            ], 403);
+        }
+
+        $reservation->update($request->all());
+
+        return response()->json([
+            'reservation' => new ReservationResource($reservation)
+        ]);
     }
 
     /**
@@ -80,6 +112,16 @@ class ReservationController extends Controller
      */
     public function destroy(Reservation $reservation)
     {
-        //
+        if (auth()->id() != $reservation->user_id) {
+            return response()->json([
+                'error' => 'You are not authorized to delete this reservation'
+            ], 403);
+        }
+
+        $reservation->delete();
+
+        return response()->json([
+            'message' => 'Reservation deleted successfully'
+        ]);
     }
 }

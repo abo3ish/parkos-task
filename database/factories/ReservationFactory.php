@@ -23,7 +23,7 @@ class ReservationFactory extends Factory
             'departure_date' => $this->faker->dateTime(),
             'parking_id' => Parking::get()->random()->id,
             'status' => $this->faker->numberBetween(1, 2),
-            'uuid' => $this->faker->uuid,
+            'uuid' => $this->faker->numberBetween(10000, 200000),
         ];
     }
 }
