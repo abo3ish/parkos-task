@@ -2,10 +2,14 @@
 
 namespace App\Providers;
 
+use App\Events\ReservationBooked;
+use App\Events\ReservationGotPaid;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Auth\Events\Registered;
+use App\Listeners\SendReservationBookedNotification;
+use App\Listeners\SendReservationGotPaidMail;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Event;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -15,8 +19,12 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
-        Registered::class => [
-            SendEmailVerificationNotification::class,
+        // Registered::class => [
+        //     SendEmailVerificationNotification::class,
+        // ],
+
+        ReservationBooked::class => [
+            SendReservationBookedNotification::class,
         ],
     ];
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ReservationBooked;
 use Exception;
 use App\Models\User;
 use App\Models\Reservation;
@@ -9,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\StoreReservation;
 use App\Http\Resources\ReservationResource;
+use App\Jobs\sendReservationPaidEmail;
 
 class ReservationController extends Controller
 {
@@ -34,7 +36,6 @@ class ReservationController extends Controller
      */
     public function store(StoreReservation $request)
     {
-        // dd(Reservation::getNextUUID());
         try {
             DB::beginTransaction();
 
@@ -47,6 +48,8 @@ class ReservationController extends Controller
                 'uuid' => Reservation::getNextUUID()
             ]);
 
+            ReservationBooked::dispatch($reservation);
+
             $reservationResource = new ReservationResource($reservation);
 
             DB::commit();
@@ -54,7 +57,6 @@ class ReservationController extends Controller
             return response()->json([
                 'reservation' => $reservationResource,
             ]);
-
         } catch (Exception $e) {
             return response()->json([
                 'error' => $e->getMessage()
@@ -97,7 +99,13 @@ class ReservationController extends Controller
             ], 403);
         }
 
+
+        if ($reservation->status == Reservation::STATUS_PENDING && $request->status == Reservation::STATUS_PAID) {
+            sendReservationPaidEmail::dispatch($reservation);
+
+        }
         $reservation->update($request->all());
+
 
         return response()->json([
             'reservation' => new ReservationResource($reservation)
