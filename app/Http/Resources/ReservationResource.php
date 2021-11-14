@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Http\Resources\ParkingResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ReservationResource extends JsonResource
@@ -18,7 +19,8 @@ class ReservationResource extends JsonResource
             'id' => $this->id,
             'uuid' => $this->uuid,
             'arrival_date' => $this->arrival_date,
-            'departure_date' => $this->departure_date
+            'departure_date' => $this->departure_date,
+            'parking' =>  new ParkingResource($this->parking),
         ];
     }
 }

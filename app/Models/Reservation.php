@@ -35,4 +35,14 @@ class Reservation extends Model
     {
         return self::getLatestUUID() + 1;
     }
+
+    public function parking()
+    {
+        return $this->belongsTo(Parking::class);
+    }
+
+    public function airport()
+    {
+        return $this->belongsTo(Airport::class);
+    }
 }
