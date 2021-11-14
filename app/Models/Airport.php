@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Parking;
+use App\Models\Reservation;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Airport extends Model
 {
@@ -15,4 +17,14 @@ class Airport extends Model
      * @var array
      */
     protected $fillable = ['name'];
+
+    public function parkings()
+    {
+        return $this->hasMany(Parking::class);
+    }
+
+    public function reservations()
+    {
+        return $this->hasManyThrough(Reservation::class, Parking::class);
+    }
 }

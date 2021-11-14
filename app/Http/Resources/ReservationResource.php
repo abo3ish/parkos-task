@@ -21,6 +21,7 @@ class ReservationResource extends JsonResource
             'arrival_date' => $this->arrival_date,
             'departure_date' => $this->departure_date,
             'parking' =>  new ParkingResource($this->parking),
+            'status' => $this->status,
         ];
     }
 }

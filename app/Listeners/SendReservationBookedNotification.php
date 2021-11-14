@@ -2,9 +2,11 @@
 
 namespace App\Listeners;
 
+use App\Mail\ReservationPaid;
 use App\Events\ReservationBooked;
-use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
 class SendReservationBookedNotification
 {
@@ -24,8 +26,10 @@ class SendReservationBookedNotification
      * @param  object  $event
      * @return void
      */
-    public function handle(ReservationBooked $event)
+    public function handle($event)
     {
         // send notification to other systems.
+        Mail::to($event->reservation->user->email)
+            ->send(new ReservationPaid());
     }
 }

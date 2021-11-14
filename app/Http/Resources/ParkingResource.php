@@ -14,6 +14,13 @@ class ParkingResource extends JsonResource
      */
     public function toArray($request)
     {
-        return parent::toArray($request);
+        return [
+            'id' => $this->id,
+            'section' => $this->section,
+            'airport' => [
+                'id' => $this->airport->id,
+                'name' => $this->airport->name,
+            ],
+        ];
     }
 }

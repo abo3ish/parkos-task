@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\StoreReservation;
 use App\Http\Resources\ReservationResource;
-use App\Jobs\sendReservationPaidEmail;
+use App\Jobs\SendReservationPaidEmail;
 
 class ReservationController extends Controller
 {
@@ -21,7 +21,7 @@ class ReservationController extends Controller
      */
     public function index()
     {
-        $reservations = Reservation::all();
+        $reservations = auth()->user()->reservations()->get();
 
         return response()->json([
             'reservations' => ReservationResource::collection($reservations),
@@ -101,9 +101,9 @@ class ReservationController extends Controller
 
 
         if ($reservation->status == Reservation::STATUS_PENDING && $request->status == Reservation::STATUS_PAID) {
-            sendReservationPaidEmail::dispatch($reservation);
-
+            SendReservationPaidEmail::dispatch($reservation);
         }
+
         $reservation->update($request->all());
 
 

@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class ReservationPaid extends Mailable implements ShouldQueue
+class ReservationPaid extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -28,6 +28,6 @@ class ReservationPaid extends Mailable implements ShouldQueue
      */
     public function build()
     {
-        return $this->view('view.name');
+        return $this->markdown('mail.reservation-paid');
     }
 }
