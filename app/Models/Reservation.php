@@ -26,6 +26,11 @@ class Reservation extends Model
         'departure_date',
     ];
 
+    protected $casts = [
+        'status' => 'integer',
+        'uuid' => 'integer'
+    ];
+
     public static function getLatestUUID()
     {
         return self::orderBy('id', 'desc')->first()->uuid ?? 1000;

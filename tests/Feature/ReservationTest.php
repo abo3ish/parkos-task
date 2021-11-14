@@ -228,4 +228,56 @@ class ReservationTest extends TestCase
             ])
             ->assertStatus(200);
     }
+
+    public function test_customer_can_see_reservation_details()
+    {
+        Parking::factory()->count(3)->create();
+
+        $reservation = Reservation::factory()
+            ->for($this->user)
+            ->create();
+
+        $this->actingAs($this->user);
+
+        $response = $this->getJson('/api/reservations/' . $reservation->id);
+
+        $response->assertStatus(200)
+            ->assertExactJson([
+                'reservation' => [
+                    'id' => $reservation->id,
+                    'uuid' => $reservation->uuid,
+                    'arrival_date' => $reservation->arrival_date,
+                    'departure_date' => $reservation->departure_date,
+                    'parking' => [
+                        'id' => $reservation->parking->id,
+                        'section' => $reservation->parking->section,
+                        'airport' => [
+                            'id' => $reservation->parking->airport->id,
+                            'name' => $reservation->parking->airport->name,
+                        ],
+                    ],
+                    'status' => $reservation->status,
+                ]
+            ]);
+
+
+    }
+
+    public function test_customer_can_delete_reservation()
+    {
+        Parking::factory()->count(3)->create();
+
+        $reservation = Reservation::factory()
+            ->for($this->user)
+            ->create();
+
+        $this->actingAs($this->user);
+
+        $response = $this->deleteJson('/api/reservations/' . $reservation->id);
+
+        $response->assertStatus(200);
+
+        $this->getJson('/api/reservations/' . $reservation->id)
+            ->assertNotFound();
+    }
 }
