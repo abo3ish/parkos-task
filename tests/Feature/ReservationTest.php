@@ -80,8 +80,8 @@ class ReservationTest extends TestCase
 
         $response = $this->postJson('/api/reservations/', [
             'user_id' => $this->user->id,
-            'arrival_date' => '02-02-2021 10:10',
-            'departure_date' => '03-02-2021 10:10',
+            'arrival_date' => $this->faker->dateTime()->format('Y-m-d H:i:s'),
+            'departure_date' => $this->faker->dateTime()->format('Y-m-d H:i:s'),
             'parking_id' => Parking::get()->random()->id,
             'status' => $this->faker->numberBetween(1, 2),
             'uuid' => $this->faker->numberBetween(10000, 200000),
@@ -160,33 +160,6 @@ class ReservationTest extends TestCase
         ->assertStatus(200);
     }
 
-    public function test_dispatch_event_when_create_reservations()
-    {
-        Event::fake();
-
-        Parking::factory()->count(3)->create();
-
-        $this->actingAs($this->user);
-
-        $response = $this->postJson('/api/reservations/', [
-            'user_id' => $this->user->id,
-            'arrival_date' => '02-02-2021 10:10',
-            'departure_date' => '03-02-2021 10:10',
-            'parking_id' => Parking::get()->random()->id,
-            'status' => $this->faker->numberBetween(1, 2),
-            'uuid' => $this->faker->numberBetween(10000, 200000),
-        ]);
-
-        Event::assertDispatched(ReservationBooked::class);
-
-        Event::assertListening(
-            ReservationBooked::class,
-            SendReservationBookedNotification::class
-        );
-
-        $response->assertStatus(200);
-    }
-
     public function test_reservation_paid_job_is_queued()
     {
         $this->withoutExceptionHandling();
@@ -227,6 +200,33 @@ class ReservationTest extends TestCase
                 ]
             ])
             ->assertStatus(200);
+    }
+
+    public function test_dispatch_event_when_create_reservations()
+    {
+        Event::fake();
+
+        Parking::factory()->count(3)->create();
+
+        $this->actingAs($this->user);
+
+        $response = $this->postJson('/api/reservations/', [
+            'user_id' => $this->user->id,
+            'arrival_date' => $this->faker->dateTime()->format('Y-m-d H:i:s'),
+            'departure_date' => $this->faker->dateTime()->format('Y-m-d H:i:s'),
+            'parking_id' => Parking::get()->random()->id,
+            'status' => $this->faker->numberBetween(1, 2),
+            'uuid' => $this->faker->numberBetween(10000, 200000),
+        ]);
+
+        Event::assertDispatched(ReservationBooked::class);
+
+        Event::assertListening(
+            ReservationBooked::class,
+            SendReservationBookedNotification::class
+        );
+
+        $response->assertStatus(200);
     }
 
     public function test_customer_can_see_reservation_details()

@@ -29,7 +29,5 @@ class SendReservationBookedNotification
     public function handle($event)
     {
         // send notification to other systems.
-        Mail::to($event->reservation->user->email)
-            ->send(new ReservationPaid());
     }
 }

@@ -74,6 +74,7 @@ class ReservationController extends Controller
      */
     public function show(Reservation $reservation)
     {
+        /* can be replaced by gates and middleware */
         if (auth()->id() != $reservation->user_id) {
             return response()->json([
                 'error' => 'You are not authorized to view this reservation'
